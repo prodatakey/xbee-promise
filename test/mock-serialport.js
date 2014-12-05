@@ -1,5 +1,3 @@
-/*jslint node:true, nomen:true */
-
 /*
  * test/mock-serialport.js
  * https://github.com/101100/xbee-promise

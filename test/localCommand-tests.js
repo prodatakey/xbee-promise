@@ -1,6 +1,3 @@
-/*jslint node:true, regexp: true */
-/*global describe:false, it:false, beforeEach:false */
-
 /*
  * test/localCommand-tests.js
  * https://github.com/101100/xbee-promise
@@ -15,7 +12,8 @@
 
 var assert = require("assert");
 var should = require("should");
-var Q = require("q");
+var Bluebird = require("bluebird");
+var sinon = require('sinon');
 
 var proxyquire = require("proxyquire");
 var mockserialport = require("./mock-serialport.js");
@@ -35,13 +33,19 @@ describe('xbee-promise', function () {
             describe('localCommand', function () {
 
                 var xbee;
+                var clock;
 
                 beforeEach(function () {
+                    clock = sinon.useFakeTimers();
                     xbee = xbeePromise({
                         serialport: "serialport path",
                         module: module,
                         defaultTimeoutMs: 100
                     });
+                });
+
+                afterEach(function() {
+                    clock.restore();
                 });
 
                 function callRemoteCommand(params) {
@@ -135,7 +139,7 @@ describe('xbee-promise', function () {
 
                     it("returns a promise", function () {
 
-                        Q.isPromise(commandPromise).should.equal(true);
+                      commandPromise.should.be.an.instanceOf(Bluebird);
 
                     });
 
@@ -163,15 +167,10 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("resolves promise with 'commandData'", function (done) {
-
-                            commandPromise.then(function (result) {
+                        it("resolves promise with 'commandData'", function () {
+                            return commandPromise.then(function (result) {
                                 result.should.eql([ 64, 159, 115, 3 ]);
-                                done();
-                            }).catch(function (result) {
-                                throw result;
-                            }).done();
-
+                            });
                         });
 
                     });
@@ -189,23 +188,16 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
-
-                            var areDone = false;
-
-                            setTimeout(function () {
-                                areDone = true;
-                                done();
-                            }, 50);
+                        it("does not resolve or reject promise", function () {
 
                             commandPromise.then(function () {
                                 assert.fail("Promise was resolved");
                             }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                                assert.fail("Promise was rejected early");
+                            });
 
+                            clock.tick(50);
+                            
                         });
 
                     });
@@ -223,22 +215,15 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("does not resolve or reject promise", function (done) {
-
-                            var areDone = false;
-
-                            setTimeout(function () {
-                                areDone = true;
-                                done();
-                            }, 50);
+                        it("does not resolve or reject promise", function () {
 
                             commandPromise.then(function () {
                                 assert.fail("Promise was resolved");
                             }).catch(function () {
-                                if (!areDone) {
-                                    assert.fail("Promise was rejected early");
-                                }
-                            }).done();
+                                assert.fail("Promise was rejected early");
+                            });
+
+                            clock.tick(50);
 
                         });
 
@@ -257,13 +242,12 @@ describe('xbee-promise', function () {
 
                         });
 
-                        it("rejects promise with Error", function (done) {
+                        it("rejects promise with Error", function () {
 
-                            commandPromise.catch(function (result) {
+                            return commandPromise.catch(function (result) {
                                 result.should.be.instanceof(Error);
                                 result.message.should.be.type("string");
-                                done();
-                            }).done();
+                            });
 
                         });
 
@@ -271,13 +255,13 @@ describe('xbee-promise', function () {
 
                     describe("with no response frame", function () {
 
-                        it("rejects promise with Error", function (done) {
-
-                            commandPromise.catch(function (result) {
+                        it("rejects promise with Error", function () {
+                            clock.tick(1000);
+                            
+                            return commandPromise.catch(function (result) {
                                 result.should.be.instanceof(Error);
-                                result.message.should.match(/Timed out after 100 ms/);
-                                done();
-                            }).done();
+                                result.message.should.match(/imed out after 100 ms/);
+                            });
 
                         });
 

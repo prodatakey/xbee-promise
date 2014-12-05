@@ -12,20 +12,17 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        jslint: {
+        jshint: {
             allSource: {
                 src: files.allSource,
-                directives: {
-                    todo: true
-                },
                 options: {
-                    errorsOnly: true
+                  jshintrc: true
                 }
             }
         },
         simplemocha: {
             options: {
-                reporter: 'tap'
+                reporter: 'spec'
             },
             all: {
                 src: files.tests
@@ -33,16 +30,16 @@ module.exports = function (grunt) {
         },
         watch: {
             files: files.allSource,
-            tasks: ['jslint', 'simplemocha']
+            tasks: ['jshint', 'simplemocha']
         }
     });
 
-    grunt.loadNpmTasks('grunt-jslint');
+    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-simple-mocha');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
-    grunt.registerTask('test', ['jslint', 'simplemocha']);
+    grunt.registerTask('test', ['jshint', 'simplemocha']);
 
-    grunt.registerTask('default', ['jslint', 'simplemocha', 'watch']);
+    grunt.registerTask('default', ['jshint', 'simplemocha', 'watch']);
 
 };
