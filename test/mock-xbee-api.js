@@ -45,7 +45,7 @@ MockXBeeAPI.prototype.emitFrame = function (frame) {
 
 // Parsing isn't actually needed
 MockXBeeAPI.prototype.rawParser = function () {
-    return mockdata.fauxParser;
+    return mockdata.parser;
 };
 
 MockXBeeAPI.prototype.nextFrameId = function () {

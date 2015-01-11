@@ -1,6 +1,3 @@
-/*jslint node:true */
-/*globals module:false */
-
 "use strict";
 
 module.exports = function (grunt) {
